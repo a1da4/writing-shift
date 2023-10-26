@@ -163,3 +163,4 @@ cython_debug/
 # added
 data/
 models/
+results/
