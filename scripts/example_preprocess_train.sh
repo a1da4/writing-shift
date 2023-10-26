@@ -1,22 +1,14 @@
 cd /work/src
 
-# Setting
-## data directory
 data_dir="/work/data"
-## parameter of subsampling
 t=1e-05
-## frequency threshold
 thresh=20
-
-## model directory
 model_dir="/work/models/thresh-${thresh}"
-## window size
+
 window=10
-## dimension size
 dim=100
 
-## target file pathes (separated by space)
-file_pathes="${data_dir}/file_0.txt ${data_dir}/file_1.txt ${data_dir}/file_2.txt"
+file_pathes="${data_dir}/magazine_1933-1949.txt ${data_dir}/magazine_1997-2013.txt"
 
 file_pathes_preprocessed=""
 
