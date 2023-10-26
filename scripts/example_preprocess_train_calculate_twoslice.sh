@@ -1,22 +1,15 @@
 cd /work/src
 
-# Setting
-## data directory
 data_dir="/work/data"
-## parameter of subsampling
 t=1e-05
-## frequency threshold
 thresh=20
-
-## model directory
 model_dir="/work/models/thresh-${thresh}"
-## window size
+result_dir="/work/results/thresh-${thresh}"
+
 window=10
-## dimension size
 dim=100
 
-## target file pathes (separated by space)
-file_pathes="${data_dir}/file_0.txt ${data_dir}/file_1.txt ${data_dir}/file_2.txt"
+file_pathes="${data_dir}/magazine_1933-1949.txt ${data_dir}/magazine_1997-2013.txt"
 
 file_pathes_preprocessed=""
 
@@ -71,3 +64,11 @@ python3 joint_decompose.py \
 
 mv WV_d-"${dim}".npy "${model_dir}"/WV_w-"${window}"_d-"${dim}".npy
 
+
+python3 calculate_neighbors.py \
+	--pickle_id2word "${model_dir}"/id2word.pkl \
+	--joint_vector "${model_dir}"/WV_w-10_d-100.npy \
+	--target_words "${data_dir}"/target.txt 
+
+mkdir "${result_dir}"
+mv result_targetword_neighbors.tsv "${result_dir}"/

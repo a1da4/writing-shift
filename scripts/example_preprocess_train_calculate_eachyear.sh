@@ -1,14 +1,15 @@
 cd /work/src
 
 data_dir="/work/data"
-t=1e-05
+t=1e-04
 thresh=20
 model_dir="/work/models/thresh-${thresh}"
+result_dir="/work/results/thresh-${thresh}"
 
 window=10
 dim=100
 
-file_pathes="${data_dir}/magazine_1933-1949.txt ${data_dir}/magazine_1997-2013.txt"
+file_pathes="${data_dir}/magazine_1933-1933.txt ${data_dir}/magazine_1941-1941.txt ${data_dir}/magazine_1949-1949.txt ${data_dir}/magazine_1957-1957.txt ${data_dir}/magazine_1965-1965.txt ${data_dir}/magazine_1973-1973.txt ${data_dir}/magazine_1981-1981.txt ${data_dir}/magazine_1989-1989.txt ${data_dir}/magazine_1997-1997.txt ${data_dir}/magazine_2005-2005.txt ${data_dir}/magazine_2013-2013.txt"
 
 file_pathes_preprocessed=""
 
@@ -63,3 +64,11 @@ python3 joint_decompose.py \
 
 mv WV_d-"${dim}".npy "${model_dir}"/WV_w-"${window}"_d-"${dim}".npy
 
+
+python3 calculate_neighbors.py \
+	--pickle_id2word "${model_dir}"/id2word.pkl \
+	--joint_vector "${model_dir}"/WV_w-10_d-100.npy \
+	--target_words "${data_dir}"/target.txt 
+
+mkdir "${result_dir}"
+mv result_targetword_neighbors.tsv "${result_dir}"/
