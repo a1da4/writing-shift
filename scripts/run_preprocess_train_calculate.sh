@@ -42,6 +42,12 @@ python3 obtain_sharedvocab.py \
 mkdir "${model_dir}"
 mv word2freq_* id2word* "${model_dir}"
 
+python3 add_targetwords_into_vocab.py \
+	--pickle_id2word "${model_dir}"/id2word.pkl \
+        --target_words "${data_dir}"/target.txt
+
+mv id2word.pkl "${model_dir}"
+
 
 # Training
 cd /work/src/sppmisvd
