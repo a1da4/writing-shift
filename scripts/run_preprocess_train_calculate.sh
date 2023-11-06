@@ -83,7 +83,7 @@ mv WV_d-"${dim}".npy "${model_dir}"/WV_w-"${window}"_d-"${dim}".npy
 
 python3 calculate_neighbors.py \
 	--pickle_id2word "${model_dir}"/id2word.pkl \
-	--joint_vector "${model_dir}"/WV_w-10_d-100.npy \
+	--joint_vector "${model_dir}"/WV_w-"${window}"_d-"${dim}".npy \
 	--target_words "${data_dir}"/target.txt 
 
 mkdir "${result_dir}"
