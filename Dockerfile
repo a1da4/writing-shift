@@ -31,7 +31,7 @@ RUN apt-get -y install language-pack-ja-base language-pack-ja
 RUN pip install --upgrade pip && \
     pip install --upgrade setuptools
 
-RUN python3 -m pip install --user numpy matplotlib pandas plotly scikit-learn scipy tqdm mecab-python3 unidic
+RUN python3 -m pip install --user numpy matplotlib pandas plotly scikit-learn scipy tqdm mecab-python3 unidic japanize_matplotlib
 RUN python3 -m unidic download
 # mecab `dicdir` is in /var/lib/mecab/dic/, but unidic is installed in /root/.local/lib/python3.8/site-packages/unidic
 # as the other dictionaries (debian, ipadic), make a symbolic link of unidic
