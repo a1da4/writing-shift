@@ -43,13 +43,18 @@ def get_vectors_eachslice(id2word: Dict[int, str],
             logging.debug(f"[get_neighbors] get neighbors of {target_word}")
             word2neighbors[target_word] = []
             pair_dists = cdist(np.reshape(target_vec, [1, -1]), WV)[0]
-            for neighbor_id in np.argsort(pair_dists)[1:num_neighbors + 1]:
+            #for neighbor_id in np.argsort(pair_dists)[1:num_neighbors + 1]:
+            for neighbor_id in np.argsort(pair_dists)[1:]:
                 neighbor_word = id2word[neighbor_id]
+                if neighbor_word in set(target_words):
+                    continue
                 neighbor_vec = WV[neighbor_id]
                 neighbor_word = neighbor_word if suffix is None else f"{neighbor_word}_{suffix}"
                 word2vec[neighbor_word] = neighbor_vec
                 word2neighbors[target_word].append(neighbor_word)
                 logging.debug(f"[get_neighbors]   - neighbor: {neighbor_word}, dist: {pair_dists[neighbor_id]}")
+                if len(word2neighbors[target_word]) >= num_neighbors:
+                    break
             logging.debug(f"[get_neighbors] - w2v: {len(word2vec)} items")
             logging.debug(f"[get_neighbors] - w2n: {word2neighbors}")
 
@@ -126,19 +131,6 @@ def plot_2d(target_words: List[str],
         vec = vecid2vec_2d[vecid]
         plt.text(vec[0], vec[1], word)
 
-    """
-    if T == 1:
-        for target_word in target_words:
-            if len(word2neighbors) > 0: 
-                neighbor_words = word2neighbors[target_word]
-    else:
-        for curr_time in range(T):
-            for target_word in target_words:
-                target_word_curr = f"{target_word}_{curr_time}"
-                if len(word2neighbors) > 0:
-                    neighbor_words = word2neighbors[target_word_curr]
-    """
-
     plt.savefig(f"{output}.png")
     plt.clf()
 
@@ -157,12 +149,13 @@ def visualize(id2word: Dict[int, str],
     # group, one-slice
     ## group words
     ## group vectors
-    w2v, w2n = get_vectors_eachslice(id2word, word2id, target_words, WV_eachtimes[0], False)
-    logging.info("[visualize] group, one-slice:")
-    logging.info(f"[visualize] - w2v: {len(w2v)} items")
-    logging.info(f"[visualize] - w2n: {w2n}")
-    plot_2d(target_words, w2v, w2n, f"group_single_{output}")
-    
+    for curr_time in range(T):
+        w2v, w2n = get_vectors_eachslice(id2word, word2id, target_words, WV_eachtimes[curr_time], False)
+        logging.info("[visualize] group, one-slice:")
+        logging.info(f"[visualize] - w2v: {len(w2v)} items")
+        logging.info(f"[visualize] - w2n: {w2n}")
+        plot_2d(target_words, w2v, w2n, f"group_single-{curr_time}_{output}")
+
     # group, all-slices
     ## group words
     ## group vectors in each slice
@@ -177,11 +170,12 @@ def visualize(id2word: Dict[int, str],
     ## group vectors
     ## neighbor words for each group word
     ## neighbor vectors for each group word
-    w2v, w2n = get_vectors_eachslice(id2word, word2id, target_words, WV_eachtimes[0], True, num_neighbors)
-    logging.info("[visualize] group+neighbors, one-slice:")
-    logging.info(f"[visualize] - w2v: {len(w2v)} items")
-    logging.info(f"[visualize] - w2n: {w2n}")
-    plot_2d(target_words, w2v, w2n, f"group-neighbor_single_{output}")
+    for curr_time in range(T):
+        w2v, w2n = get_vectors_eachslice(id2word, word2id, target_words, WV_eachtimes[curr_time], True, num_neighbors)
+        logging.info("[visualize] group+neighbors, one-slice:")
+        logging.info(f"[visualize] - w2v: {len(w2v)} items")
+        logging.info(f"[visualize] - w2n: {w2n}")
+        plot_2d(target_words, w2v, w2n, f"group-neighbor_single-{curr_time}_{output}")
 
     # group+neighbors, all-slices
     ## group words
