@@ -39,11 +39,10 @@ def get_vectors_eachslice(id2word: Dict[int, str],
         target_vec = WV[word2id[target_word]]
         target_word = target_word if suffix is None else f"{target_word}_{suffix}"
         word2vec[target_word] = target_vec
+        word2neighbors[target_word] = []
         if get_neighbors:
             logging.debug(f"[get_neighbors] get neighbors of {target_word}")
-            word2neighbors[target_word] = []
             pair_dists = cdist(np.reshape(target_vec, [1, -1]), WV)[0]
-            #for neighbor_id in np.argsort(pair_dists)[1:num_neighbors + 1]:
             for neighbor_id in np.argsort(pair_dists)[1:]:
                 neighbor_word = id2word[neighbor_id]
                 if neighbor_word in set(target_words):
@@ -125,7 +124,22 @@ def plot_2d(target_words: List[str],
     vecid2vec_2d = PCA(n_components=2).fit_transform(vecid2vec)
     logging.debug(f"[plot_2d] vecid2vec_2d: {vecid2vec_2d.shape}")
 
-    plt.scatter(vecid2vec_2d[:, 0], vecid2vec_2d[:, 1])
+    vecs_target = []
+    vecs_neighbor = []
+    vocab = set(word2neighbors.keys())
+    logging.debug(f"[plot_2d] vocab: {vocab}")
+    for word, vecid in word2vecid.items():
+        if word in vocab:
+            vecs_target.append(vecid2vec_2d[vecid])
+        else:
+            vecs_neighbor.append(vecid2vec_2d[vecid])
+    vecs_target = np.array(vecs_target)
+    vecs_neighbor = np.array(vecs_neighbor)
+    logging.debug(f"[plot_2d] vecs_target: {vecs_target.shape}")
+    logging.debug(f"[plot_2d] vecs_neighbor: {vecs_neighbor.shape}")
+    plt.scatter(vecs_target[:, 0], vecs_target[:, 1], marker="D")
+    if len(vecs_neighbor) > 0:
+        plt.scatter(vecs_neighbor[:, 0], vecs_neighbor[:, 1])
 
     for word, vecid in word2vecid.items():
         vec = vecid2vec_2d[vecid]
@@ -190,7 +204,6 @@ def visualize(id2word: Dict[int, str],
 
 
 def cli_main():
-    #logging.basicConfig(level=logging.DEBUG)
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser()
