@@ -1,4 +1,13 @@
-cd /work/src
+################################################################################################
+# FIX HERE
+
+## path to src/
+### if you use docker, main_dir is /work/src
+main_dir="/work/src"
+### if you use your original environment, main_dir is {YOUR_WORK_DIR}/writing-shift/src
+#main_dir="~/writing-shift/src"
+
+cd ${main_dir}
 
 # Setting
 ## data directory
@@ -20,6 +29,20 @@ dim=100
 
 ## target file pathes (separated by space)
 file_pathes="${data_dir}/file_0.txt ${data_dir}/file_1.txt ${data_dir}/file_2.txt"
+
+## OPTIONAL: for visualize, calculate distance within target words
+## target word file names (TARGET_NAME.txt)
+target_names="target_word_0 target_word_1 target_word_2"
+## number of neighborhood for each target word in visualization
+num_neighbors=3
+## target word file pathes
+analyze_target_path="${data_dir}"
+analyze_target_pathes=""
+for target_name in ${target_names};
+do
+	analyze_target_pathes="${analyze_target_pathes} ${analyze_target_path}/${target_name}.txt"
+done
+################################################################################################
 
 file_pathes_preprocessed=""
 
@@ -50,7 +73,7 @@ mv id2word.pkl "${model_dir}"
 
 
 # Training
-cd /work/src/sppmisvd
+cd ${main_dir}/sppmisvd
 
 count=0
 mat_pathes=""
@@ -72,7 +95,7 @@ do
 	count=$(($count+1))
 done
 
-cd /work/src/
+cd ${main_dir}
 python3 joint_decompose.py \
 	--pickle_id2word "${model_dir}"/id2word.pkl \
 	--mat_pathes ${mat_pathes} \
@@ -81,6 +104,7 @@ python3 joint_decompose.py \
 mv WV_d-"${dim}".npy "${model_dir}"/WV_w-"${window}"_d-"${dim}".npy
 
 
+# Analysis
 python3 calculate_neighbors.py \
 	--pickle_id2word "${model_dir}"/id2word.pkl \
 	--joint_vector "${model_dir}"/WV_w-"${window}"_d-"${dim}".npy \
@@ -88,3 +112,25 @@ python3 calculate_neighbors.py \
 
 mkdir "${result_dir}"
 mv result_targetword_neighbors.tsv "${result_dir}"/
+
+python3 calculate_distance_targets.py \
+	--pickle_id2word "${model_dir}"/id2word.pkl \
+	--joint_vector "${model_dir}"/WV_w-"${window}"_d-"${dim}".npy \
+	--target_word_pathes ${analyze_target_pathes} \
+	--output_names ${output_names}
+
+for output_name in ${output_names};
+do
+	mv ${output_name}.tsv ${result_dir}
+done
+
+python3 visualize.py \
+	--pickle_id2word "${model_dir}"/id2word.pkl \
+	--joint_vector "${model_dir}"/WV_w-"${window}"_d-"${dim}".npy \
+	--target_word_pathes ${analyze_target_pathes} \
+	--output_names ${output_names} --num_neighbors ${num_neighbors}
+
+for output_name in ${output_names};
+do
+	mv *${output_name}.png ${result_dir}
+done
