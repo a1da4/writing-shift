@@ -33,6 +33,7 @@ def calculate_neighbors(id2word: Dict[int, str],
     WV_eachtimes = np.split(WV, T)
 
     target_ids = list(id2target.keys())
+    targetid2neighbors = {target_id: [] for target_id in target_ids}
 
     with open("result_targetword_neighbors.tsv", "w") as fp:
         fp.write("target_word\tneighbors(distance)\n")
@@ -51,12 +52,18 @@ def calculate_neighbors(id2word: Dict[int, str],
                 pdist_curr_each = pdist_curr[pdist_id]
                 target_word = id2word[target_id]
                 logging.debug(f"[calculate_neighbors]     - target_word: {target_word}") 
-                neighbor_ids = [neighbor_id for neighbor_id in np.argsort(pdist_curr_each)[:topk+1]]
+                neighbor_ids = [neighbor_id for neighbor_id in np.argsort(pdist_curr_each)[1:topk+1]]
                 logging.debug(f"[calculate_neighbors]       - neighbor_ids: {neighbor_ids}") 
                 neighbors = [f"{id2word[neighbor_id]}({pdist_curr_each[neighbor_id]:.4f})" for neighbor_id in neighbor_ids]
                 logging.debug(f"[calculate_neighbors]       - neighbors: {neighbors}") 
 
-                fp.write(f"{target_word}\t{', '.join(neighbors)}\n")
+                targetid2neighbors[target_id].append(", ".join(neighbors))
+
+        for target_id in target_ids:
+            neighbors_overtime: List[str] = targetid2neighbors[target_id]
+            neighbors_tab_separated = "\t".join(neighbors_overtime)
+            target_word = id2word[target_id]
+            fp.write(f"{target_word}\t{neighbors_tab_separated}\n")
 
 
 def cli_main():
