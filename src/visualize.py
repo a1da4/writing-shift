@@ -43,6 +43,7 @@ def get_vectors_eachslice(id2word: Dict[int, str],
         if get_neighbors:
             logging.debug(f"[get_neighbors] get neighbors of {target_word}")
             pair_dists = cdist(np.reshape(target_vec, [1, -1]), WV)[0]
+            #for neighbor_id in np.argsort(pair_dists)[1:num_neighbors + 1]:
             for neighbor_id in np.argsort(pair_dists)[1:]:
                 neighbor_word = id2word[neighbor_id]
                 if neighbor_word in set(target_words):
@@ -120,6 +121,9 @@ def plot_2d(target_words: List[str],
         vecid += 1
     
     vecid2vec = np.array(vecid2vec)
+    if len(vecid2vec) < 2:
+        logging.info(f"[plot_2d] {target_words} has just 1 vector, cannot plot")
+        return
     logging.debug(f"[plot_2d] vecid2vec: {vecid2vec.shape}")
     vecid2vec_2d = PCA(n_components=2).fit_transform(vecid2vec)
     logging.debug(f"[plot_2d] vecid2vec_2d: {vecid2vec_2d.shape}")
@@ -165,18 +169,18 @@ def visualize(id2word: Dict[int, str],
     ## group vectors
     for curr_time in range(T):
         w2v, w2n = get_vectors_eachslice(id2word, word2id, target_words, WV_eachtimes[curr_time], False)
-        logging.info("[visualize] group, one-slice:")
-        logging.info(f"[visualize] - w2v: {len(w2v)} items")
-        logging.info(f"[visualize] - w2n: {w2n}")
+        logging.debug("[visualize] group, one-slice:")
+        logging.debug(f"[visualize] - w2v: {len(w2v)} items")
+        logging.debug(f"[visualize] - w2n: {w2n}")
         plot_2d(target_words, w2v, w2n, f"group_single-{curr_time}_{output}")
 
     # group, all-slices
     ## group words
     ## group vectors in each slice
     w2v, w2n = get_vectors_allslices(id2word, word2id, target_words, WV_eachtimes, T)
-    logging.info("[visualize] group, all-slices:")
-    logging.info(f"[visualize] - w2v: {len(w2v)} items")
-    logging.info(f"[visualize] - w2n: {w2n}")
+    logging.debug("[visualize] group, all-slices:")
+    logging.debug(f"[visualize] - w2v: {len(w2v)} items")
+    logging.debug(f"[visualize] - w2n: {w2n}")
     plot_2d(target_words, w2v, w2n, f"group_all_{output}")
 
     # group+neighbors, one-slice
@@ -186,9 +190,9 @@ def visualize(id2word: Dict[int, str],
     ## neighbor vectors for each group word
     for curr_time in range(T):
         w2v, w2n = get_vectors_eachslice(id2word, word2id, target_words, WV_eachtimes[curr_time], True, num_neighbors)
-        logging.info("[visualize] group+neighbors, one-slice:")
-        logging.info(f"[visualize] - w2v: {len(w2v)} items")
-        logging.info(f"[visualize] - w2n: {w2n}")
+        logging.debug("[visualize] group+neighbors, one-slice:")
+        logging.debug(f"[visualize] - w2v: {len(w2v)} items")
+        logging.debug(f"[visualize] - w2n: {w2n}")
         plot_2d(target_words, w2v, w2n, f"group-neighbor_single-{curr_time}_{output}")
 
     # group+neighbors, all-slices
@@ -197,13 +201,14 @@ def visualize(id2word: Dict[int, str],
     ## neighbor words for each group word in each slice
     ## neighbor vectors for each group word in each slice
     w2v, w2n = get_vectors_allslices(id2word, word2id, target_words, WV_eachtimes, T, True, num_neighbors)
-    logging.info("[visualize] group+neighbors, all-slices:")
-    logging.info(f"[visualize] - w2v: {len(w2v)} items")
-    logging.info(f"[visualize] - w2n: {w2n}")
+    logging.debug("[visualize] group+neighbors, all-slices:")
+    logging.debug(f"[visualize] - w2v: {len(w2v)} items")
+    logging.debug(f"[visualize] - w2n: {w2n}")
     plot_2d(target_words, w2v, w2n, f"group-neighbor_all_{output}")
 
 
 def cli_main():
+    #logging.basicConfig(level=logging.DEBUG)
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser()
@@ -225,7 +230,10 @@ def cli_main():
         with open(target_word_path) as fp:
             for line in fp:
                 target_word = line.strip()
-                target_words.append(target_word)
+                if target_word in word2id:
+                    target_words.append(target_word)
+        if len(target_words) == 0:
+            continue
         
         logging.debug(f"[main] - target_words: {target_words}")
         visualize(id2word, word2id, target_words, WV, args.num_neighbors, output_name)
