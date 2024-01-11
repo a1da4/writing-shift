@@ -64,19 +64,17 @@ pip install -r requirements.txt
 
 ## Run (Preprocess / Training / Analysis)
 You can run the Python scripts (.py) in `src/` yourself, but we have put executables (shell scripts, .sh) in `scripts/` that you can run at once.  
+In each .sh file, you have to define directories.
 
-```html
 <details>
-
-<summary> Example: writing-shift/scripts/run_preprocess_train_analyze.sh </summary>
+<summary>Example: writing-shift/scripts/run_preprocess_train_analyze.sh</summary>
+	
+```
 ################################################################################################
 # FIX HERE
 
 ## path to src/
-### if you use docker, main_dir is /work/src
 main_dir="/work/src"
-### if you use your original environment, main_dir is {YOUR_WORK_DIR}/writing-shift/src
-#main_dir="~/writing-shift/src"
 
 cd ${main_dir}
 
@@ -114,5 +112,10 @@ do
 	analyze_target_pathes="${analyze_target_pathes} ${analyze_target_path}/${target_name}.txt"
 done
 ################################################################################################
+```
 </details>
+
+After that, you can run preprocessing / training / analysis at once.
+```
+bash scripts/run_preprocess_train_analyze.sh
 ```
